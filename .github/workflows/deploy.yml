@@ -3,108 +3,139 @@ name: Deploy Component Hub
 on:
   push:
     branches: [ main ]
-  schedule:
-    - cron: '0 */6 * * *'  # Update every 6 hours
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
-  build-and-deploy:
+  build-deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Fetch GitHub Data
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Fetch and Build Site
         env:
           GH_TOKEN: ${{ secrets.COMPONENT_HUB_TOKEN }}
-          REPO: ${{ github.repository }}
         run: |
-          # Create output directory
           mkdir -p _site
           
-          # Recursive function to fetch all HTML files
-          fetch_contents() {
-            local path="$1"
-            local encoded_path=$(echo "$path" | jq -sRr @uri)
-            local api_url="https://api.github.com/repos/$REPO/contents/$encoded_path"
-            
-            echo "Fetching: $path"
-            
-            # Fetch with error handling
-            http_code=$(curl -s -w "%{http_code}" -o temp.json \
-                 -H "Authorization: token $GH_TOKEN" \
-                 -H "Accept: application/vnd.github.v3+json" \
-                 "$api_url")
-            
-            if [ "$http_code" != "200" ]; then
-              echo "Warning: Failed to fetch $path (HTTP $http_code)"
-              rm -f temp.json
-              return 0
-            fi
-            
-            # Check if it's valid JSON and is an array
-            if ! jq -e 'type == "array"' temp.json > /dev/null 2>&1; then
-              echo "Warning: Invalid response for $path"
-              rm -f temp.json
-              return 0
-            fi
-            
-            # Process each item
-            jq -c '.[]' temp.json 2>/dev/null | while IFS= read -r item; do
-              item_type=$(echo "$item" | jq -r '.type // empty')
-              item_path=$(echo "$item" | jq -r '.path // empty')
-              item_name=$(echo "$item" | jq -r '.name // empty')
+          # Create a Node.js script to fetch all HTML files
+          cat > fetch.js << 'FETCHJS'
+          const https = require('https');
+          const fs = require('fs');
+          
+          const TOKEN = process.env.GH_TOKEN;
+          const REPO = process.env.GITHUB_REPOSITORY;
+          
+          async function fetchJSON(path) {
+            return new Promise((resolve, reject) => {
+              const options = {
+                hostname: 'api.github.com',
+                path: `/repos/${REPO}/contents/${encodeURIComponent(path)}`,
+                headers: {
+                  'User-Agent': 'GitHub-Actions',
+                  'Authorization': `token ${TOKEN}`,
+                  'Accept': 'application/vnd.github.v3+json'
+                }
+              };
               
-              if [ -z "$item_type" ] || [ -z "$item_path" ]; then
-                continue
-              fi
-              
-              if [ "$item_type" = "file" ] && [[ "$item_name" == *.html ]]; then
-                echo "$item" >> _site/all_files.jsonl
-              elif [ "$item_type" = "dir" ]; then
-                fetch_contents "$item_path"
-              fi
-            done
-            
-            rm -f temp.json
+              https.get(options, (res) => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => {
+                  try {
+                    resolve(JSON.parse(data));
+                  } catch(e) {
+                    console.error('Parse error for path:', path);
+                    resolve(null);
+                  }
+                });
+              }).on('error', reject);
+            });
           }
           
-          # Start fetching from root
-          touch _site/all_files.jsonl
-          fetch_contents ""
+          async function findHTMLFiles(path = '') {
+            console.log('Scanning:', path || 'root');
+            const contents = await fetchJSON(path);
+            
+            if (!Array.isArray(contents)) {
+              console.log('Not a directory or error:', path);
+              return [];
+            }
+            
+            let htmlFiles = [];
+            
+            for (const item of contents) {
+              if (item.type === 'file' && item.name.endsWith('.html')) {
+                htmlFiles.push({
+                  name: item.name,
+                  path: item.path,
+                  size: item.size,
+                  html_url: item.html_url,
+                  download_url: item.download_url
+                });
+                console.log('Found HTML:', item.path);
+              } else if (item.type === 'dir') {
+                const subFiles = await findHTMLFiles(item.path);
+                htmlFiles = htmlFiles.concat(subFiles);
+              }
+            }
+            
+            return htmlFiles;
+          }
           
-          # Check if we found any files
-          if [ ! -s _site/all_files.jsonl ]; then
-            echo "[]" > _site/components.json
-            echo "Warning: No HTML files found"
-          else
-            # Convert to JSON array
-            echo "[" > _site/components.json
-            cat _site/all_files.jsonl | sed '$ ! s/$/,/' >> _site/components.json
-            echo "]" >> _site/components.json
-            rm _site/all_files.jsonl
-          fi
+          async function getRepoInfo() {
+            return new Promise((resolve, reject) => {
+              const options = {
+                hostname: 'api.github.com',
+                path: `/repos/${REPO}`,
+                headers: {
+                  'User-Agent': 'GitHub-Actions',
+                  'Authorization': `token ${TOKEN}`,
+                  'Accept': 'application/vnd.github.v3+json'
+                }
+              };
+              
+              https.get(options, (res) => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => resolve(JSON.parse(data)));
+              }).on('error', reject);
+            });
+          }
           
-          # Fetch repo info
-          curl -s -H "Authorization: token $GH_TOKEN" \
-               -H "Accept: application/vnd.github.v3+json" \
-               "https://api.github.com/repos/$REPO" > _site/repo-info.json
+          async function main() {
+            console.log('Fetching HTML files...');
+            const htmlFiles = await findHTMLFiles();
+            console.log(`Total HTML files found: ${htmlFiles.length}`);
+            
+            fs.writeFileSync('_site/components.json', JSON.stringify(htmlFiles, null, 2));
+            
+            console.log('Fetching repo info...');
+            const repoInfo = await getRepoInfo();
+            fs.writeFileSync('_site/repo-info.json', JSON.stringify(repoInfo, null, 2));
+            
+            console.log('✅ Data fetched successfully');
+          }
           
-          file_count=$(jq 'length' _site/components.json)
-          echo "✅ Found $file_count HTML files"
+          main().catch(console.error);
+          FETCHJS
+          
+          # Run the fetch script
+          node fetch.js
+          
+          # Show what we found
+          echo "Components found:"
+          cat _site/components.json | head -20
       
       - name: Generate HTML
         run: |
@@ -114,7 +145,7 @@ jobs:
           <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>정부 웹사이트 컴포넌트 허브</title>
+              <title>Component Hub - Swjb_CivilOneStop</title>
               <style>
                   * { margin: 0; padding: 0; box-sizing: border-box; }
                   body {
@@ -207,7 +238,6 @@ jobs:
                       font-weight: 700;
                       color: #1a1a1a;
                       margin-bottom: 12px;
-                      letter-spacing: -0.02em;
                   }
                   .page-description {
                       font-size: 18px;
@@ -269,7 +299,7 @@ jobs:
                       border: 1px solid #e5e5e5;
                       border-radius: 16px;
                       padding: 28px;
-                      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                      transition: all 0.3s;
                       cursor: pointer;
                       position: relative;
                       overflow: hidden;
@@ -307,13 +337,12 @@ jobs:
                       font-weight: 600;
                       color: #1a1a1a;
                       margin-bottom: 8px;
-                      letter-spacing: -0.01em;
                   }
                   .component-path {
                       font-size: 12px;
                       color: #999;
                       margin-bottom: 16px;
-                      font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+                      font-family: 'Monaco', monospace;
                       overflow: hidden;
                       text-overflow: ellipsis;
                       white-space: nowrap;
@@ -383,29 +412,6 @@ jobs:
                       font-weight: 500;
                   }
                   .repo-info a:hover { text-decoration: underline; }
-                  .footer-content {
-                      display: grid;
-                      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                      gap: 48px;
-                      margin-bottom: 48px;
-                  }
-                  .footer-section h3 {
-                      font-size: 14px;
-                      font-weight: 600;
-                      margin-bottom: 16px;
-                      color: #1a1a1a;
-                      text-transform: uppercase;
-                      letter-spacing: 0.05em;
-                  }
-                  .footer-link {
-                      display: block;
-                      color: #666;
-                      text-decoration: none;
-                      margin-bottom: 12px;
-                      font-size: 14px;
-                      transition: color 0.2s;
-                  }
-                  .footer-link:hover { color: #667eea; }
                   .footer-bottom {
                       border-top: 1px solid #e5e5e5;
                       padding-top: 32px;
@@ -449,7 +455,7 @@ jobs:
                   <div class="page-header">
                       <h1 class="page-title">Component Library</h1>
                       <p class="page-description">
-                          Browse and explore open-source government website components automatically synced from GitHub.
+                          Browse and explore government website components from GitHub.
                       </p>
                   </div>
                   <div class="search-container">
@@ -473,18 +479,6 @@ jobs:
               <footer>
                   <div class="footer-container">
                       <div class="repo-info" id="repoInfo"></div>
-                      <div class="footer-content">
-                          <div class="footer-section">
-                              <h3>Project</h3>
-                              <a href="#" class="footer-link" id="githubLink">GitHub Repository</a>
-                              <a href="#" class="footer-link">Documentation</a>
-                          </div>
-                          <div class="footer-section">
-                              <h3>Community</h3>
-                              <a href="#" class="footer-link" id="issuesLink">Issues</a>
-                              <a href="#" class="footer-link">License</a>
-                          </div>
-                      </div>
                       <div class="footer-bottom">
                           <p>Open Source Project · Built with ❤️</p>
                       </div>
@@ -541,9 +535,7 @@ jobs:
                           }));
 
                           const repoUrl = repoData.html_url;
-                          document.getElementById('githubLink').href = repoUrl;
                           document.getElementById('githubHeaderLink').href = repoUrl;
-                          document.getElementById('issuesLink').href = `${repoUrl}/issues`;
 
                           document.getElementById('repoInfo').innerHTML = `
                               <strong>Repository:</strong> 
@@ -554,6 +546,7 @@ jobs:
                           updateStats(allComponents.length, allComponents.length);
                           renderComponents(allComponents);
                       } catch (error) {
+                          console.error('Error:', error);
                           document.getElementById('componentGrid').innerHTML = `
                               <div class="empty-state">
                                   <div class="empty-state-icon">⚠️</div>
@@ -632,6 +625,8 @@ jobs:
           </body>
           </html>
           HTMLEOF
+          
+          echo "✅ HTML generated"
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
