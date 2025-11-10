@@ -621,6 +621,11 @@ jobs:
                   }
 
                   async function init() {
+                      // --- START: Updated logic ---
+                      const startTime = Date.now();
+                      const minLoadTime = 1500; // Minimum 1.5 seconds
+                      // --- END: Updated logic ---
+
                       try {
                           updateLoaderLog('Finding content path...');
                           // --- START: Robust Base Path Fix for GitHub Pages ---
@@ -663,20 +668,37 @@ jobs:
                           updateStats(allComponents.length, allComponents.length);
                           renderComponents(allComponents);
                           
-                          // Hide loader on success
-                          hideLoader();
+                          // --- START: Updated logic ---
+                          // Calculate how long we've been loading
+                          const elapsedTime = Date.now() - startTime;
+                          // Wait for the remaining time, if any
+                          const remainingTime = Math.max(0, minLoadTime - elapsedTime);
+                          
+                          setTimeout(() => {
+                              // Hide loader on success
+                              hideLoader();
+                          }, remainingTime);
+                          // --- END: Updated logic ---
 
                       } catch (error) {
                           console.error('Error:', error);
-                          // Still hide loader on error to show the error message in the main content area
-                          hideLoader(); 
-                          document.getElementById('componentGrid').innerHTML = `
-                              <div class="empty-state">
-                                  <div class="empty-state-icon">⚠️</div>
-                                  <div class="empty-state-title">Error loading components</div>
-                                  <p class="empty-state-text">${error.message}. Check console for details.</p>
-                              </div>
-                          `;
+
+                          // --- START: Updated logic (for error) ---
+                          const elapsedTime = Date.now() - startTime;
+                          const remainingTime = Math.max(0, minLoadTime - elapsedTime);
+
+                          setTimeout(() => {
+                              // Still hide loader on error to show the error message
+                              hideLoader(); 
+                              document.getElementById('componentGrid').innerHTML = `
+                                  <div class="empty-state">
+                                      <div class="empty-state-icon">⚠️</div>
+                                      <div class="empty-state-title">Error loading components</div>
+                                      <p class="empty-state-text">${error.message}. Check console for details.</p>
+                                  </div>
+                              `;
+                          }, remainingTime);
+                          // --- END: Updated logic (for error) ---
                       }
                   }
 
