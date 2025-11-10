@@ -144,9 +144,10 @@ jobs:
         run: |
           cat > _site/index.html << 'HTMLEOF'
           <!DOCTYPE html>
-          <html lang="ko">
+          <html lang="en">
           <head>
               <meta charset="UTF-8">
+              <meta name="Project: Swjb_CivilOneStop Asset Archive.">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <title>Component Hub - Swjb_CivilOneStop</title>
               <style>
@@ -728,6 +729,7 @@ jobs:
                   
                   <div class="stats-bar" id="statsBar">
                       <div class="stat-item">
+                          <span>Total</span>
                           <span class="stat-number" id="totalCount">0</span>
                           <span>components</span>
                       </div>
