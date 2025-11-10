@@ -687,7 +687,7 @@ jobs:
               <div id="loader-overlay">
                   <div class="loader-content">
                       <div class="logo-icon">📦</div>
-                      <h3>Loading Component Hub</h3>
+                      <h3>Loading CivilOneStop Hub</h3>
                       <div class="progress-bar-container">
                           <div class="progress-bar-indeterminate"></div>
                       </div>
@@ -699,11 +699,10 @@ jobs:
                   <div class="header-container">
                       <div class="logo">
                           <div class="logo-icon">📦</div>
-                          <span>Component Hub</span>
+                          <span>CivilOneStop Hub</span>
                       </div>
                       <div class="header-links">
                           <a href="#" class="header-link" id="githubHeaderLink">GitHub</a>
-                          <a href="#" class="header-link">Documentation</a>
                           <button class="theme-toggle" onclick="toggleTheme()">
                               <span id="themeIcon">🌙</span>
                               <span id="themeText">Dark</span>
@@ -712,20 +711,11 @@ jobs:
                   </div>
               </header>
               
-              <nav>
-                  <div class="nav-container">
-                      <div class="nav-item active" onclick="showCategory('all')">All</div>
-                      <div class="nav-item" onclick="showCategory('components')">Components</div>
-                      <div class="nav-item" onclick="showCategory('pages')">Pages</div>
-                      <div class="nav-item" onclick="showCategory('templates')">Templates</div>
-                  </div>
-              </nav>
-              
               <main>
                   <div class="page-header">
-                      <h1 class="page-title">Component Library</h1>
+                      <h1 class="page-title">CivilOneStop Hub</h1>
                       <p class="page-description">
-                          Browse and explore government website components from GitHub.
+                          Project: Swjb_CivilOneStop Asset Archive. 
                       </p>
                   </div>
                   
@@ -754,7 +744,7 @@ jobs:
                   <div class="footer-container">
                       <div class="repo-info" id="repoInfo"></div>
                       <div class="footer-bottom">
-                          <p>Open Source Project · Built with ❤️</p>
+                          <p>Project: CivilOneStop · Built by @Special-Srit and @minjun0629</p>
                       </div>
                   </div>
               </footer>
@@ -810,8 +800,6 @@ jobs:
                   function detectCategory(path) {
                       const lowerPath = path.toLowerCase();
                       if (lowerPath.includes('component')) return 'components';
-                      if (lowerPath.includes('page')) return 'pages';
-                      if (lowerPath.includes('template')) return 'templates';
                       return 'components';
                   }
 
