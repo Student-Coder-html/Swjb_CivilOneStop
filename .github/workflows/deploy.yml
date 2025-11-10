@@ -522,9 +522,20 @@ jobs:
 
                   async function init() {
                       try {
+                          // --- START: Robust Base Path Fix for GitHub Pages ---
+                          let basePath = window.location.pathname;
+                          if (basePath.endsWith('index.html')) {
+                              basePath = basePath.substring(0, basePath.lastIndexOf('index.html'));
+                          }
+                          if (!basePath.endsWith('/')) {
+                              basePath += '/';
+                          }
+                          // --- END: Fix ---
+
                           const [componentsData, repoData] = await Promise.all([
-                              fetch('components.json').then(r => r.json()),
-                              fetch('repo-info.json').then(r => r.json())
+                              // Use the dynamic base path to fetch
+                              fetch(basePath + 'components.json').then(r => r.json()),
+                              fetch(basePath + 'repo-info.json').then(r => r.json())
                           ]);
 
                           allComponents = componentsData.map(item => ({
@@ -554,7 +565,7 @@ jobs:
                               <div class="empty-state">
                                   <div class="empty-state-icon">⚠️</div>
                                   <div class="empty-state-title">Error loading components</div>
-                                  <p class="empty-state-text">${error.message}</p>
+                                  <p class="empty-state-text">${error.message}. Check console for details.</p>
                               </div>
                           `;
                       }
