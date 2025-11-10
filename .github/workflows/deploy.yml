@@ -37,30 +37,47 @@ jobs:
           
           # Recursive function to fetch all HTML files
           fetch_contents() {
-            local path=$1
-            local api_url="https://api.github.com/repos/$REPO/contents/$path"
+            local path="$1"
+            local encoded_path=$(echo "$path" | jq -sRr @uri)
+            local api_url="https://api.github.com/repos/$REPO/contents/$encoded_path"
             
-            echo "Fetching: $api_url"
+            echo "Fetching: $path"
             
-            curl -s -H "Authorization: token $GH_TOKEN" \
+            # Fetch with error handling
+            http_code=$(curl -s -w "%{http_code}" -o temp.json \
+                 -H "Authorization: token $GH_TOKEN" \
                  -H "Accept: application/vnd.github.v3+json" \
-                 "$api_url" > temp.json
+                 "$api_url")
             
-            # Check if directory or file
-            if jq -e 'type == "array"' temp.json > /dev/null 2>&1; then
-              # It's a directory
-              jq -c '.[]' temp.json | while read item; do
-                item_type=$(echo "$item" | jq -r '.type')
-                item_path=$(echo "$item" | jq -r '.path')
-                item_name=$(echo "$item" | jq -r '.name')
-                
-                if [ "$item_type" = "file" ] && [[ "$item_name" == *.html ]]; then
-                  echo "$item" >> _site/all_files.jsonl
-                elif [ "$item_type" = "dir" ]; then
-                  fetch_contents "$item_path"
-                fi
-              done
+            if [ "$http_code" != "200" ]; then
+              echo "Warning: Failed to fetch $path (HTTP $http_code)"
+              rm -f temp.json
+              return 0
             fi
+            
+            # Check if it's valid JSON and is an array
+            if ! jq -e 'type == "array"' temp.json > /dev/null 2>&1; then
+              echo "Warning: Invalid response for $path"
+              rm -f temp.json
+              return 0
+            fi
+            
+            # Process each item
+            jq -c '.[]' temp.json 2>/dev/null | while IFS= read -r item; do
+              item_type=$(echo "$item" | jq -r '.type // empty')
+              item_path=$(echo "$item" | jq -r '.path // empty')
+              item_name=$(echo "$item" | jq -r '.name // empty')
+              
+              if [ -z "$item_type" ] || [ -z "$item_path" ]; then
+                continue
+              fi
+              
+              if [ "$item_type" = "file" ] && [[ "$item_name" == *.html ]]; then
+                echo "$item" >> _site/all_files.jsonl
+              elif [ "$item_type" = "dir" ]; then
+                fetch_contents "$item_path"
+              fi
+            done
             
             rm -f temp.json
           }
@@ -69,18 +86,25 @@ jobs:
           touch _site/all_files.jsonl
           fetch_contents ""
           
-          # Convert to JSON array
-          echo "[" > _site/components.json
-          cat _site/all_files.jsonl | sed '$ ! s/$/,/' >> _site/components.json
-          echo "]" >> _site/components.json
-          rm _site/all_files.jsonl
+          # Check if we found any files
+          if [ ! -s _site/all_files.jsonl ]; then
+            echo "[]" > _site/components.json
+            echo "Warning: No HTML files found"
+          else
+            # Convert to JSON array
+            echo "[" > _site/components.json
+            cat _site/all_files.jsonl | sed '$ ! s/$/,/' >> _site/components.json
+            echo "]" >> _site/components.json
+            rm _site/all_files.jsonl
+          fi
           
           # Fetch repo info
           curl -s -H "Authorization: token $GH_TOKEN" \
                -H "Accept: application/vnd.github.v3+json" \
                "https://api.github.com/repos/$REPO" > _site/repo-info.json
           
-          echo "Found $(jq length _site/components.json) HTML files"
+          file_count=$(jq 'length' _site/components.json)
+          echo "✅ Found $file_count HTML files"
       
       - name: Generate HTML
         run: |
