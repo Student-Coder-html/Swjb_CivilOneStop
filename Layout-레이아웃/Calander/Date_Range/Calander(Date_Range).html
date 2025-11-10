@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Project: CivilOneStop의 웹사이트 리램프 작업">
+    <meta name="keywords" content="수원정보고, 미래유망, 2025 고1, swjb, CvilOneStop, Suwon, Revamp">
+    <title>Calander</title>
+</head>
+
+<body>
+    <div class="form-group">
+        <div class="form-tit">
+            날짜선택
+        </div>
+        <div class="form-conts datepicker-conts">
+            <div class="datepicker-input">
+                <ul class="input-group range set">
+                    <li>
+                        <input type="number" class="form-control datepicker" placeholder="시작날짜" title="시작날짜 입력">
+                    </li>
+                    <li class="mark">-</li>
+                    <li>
+                        <input type="number" class="form-control datepicker" placeholder="종료날짜" title="시작날짜 입력">
+                    </li>
+                </ul>
+                <button type="button" class="form-btn-datepicker">
+                    <span class="sr-only">달력 열기</span>
+                </button>
+            </div>
+            <div class="datepicker-area range">
+                <div class="datepicker-wrap bottom" aria-hidden="true" tabindex="-1">
+                    <div class="datepicker-head">
+                        <button type="button" class="btn-cal-move prev"><span class="sr-only">이전 달</span></button>
+                        <div class="datepicker-switch-wrap">
+                            <button type="button" class="btn-cal-switch year">2023년</button>
+                            <button type="button" class="btn-cal-switch month">12월</button>
+                        </div>
+                        <button type="button" class="btn-cal-move next"><span class="sr-only">다음 달</span></button>
+                    </div>
+                    <div class="datepicker-body">
+                        <div class="datepicker-conts datepicker-tbl-wrap" aria-hidden="true" tabindex="-1">
+                            <table class="datepicker-tbl">
+                                <thead>
+                                    <tr>
+                                        <th>Su</th>
+                                        <th>Mo</th>
+                                        <th>Tu</th>
+                                        <th>We</th>
+                                        <th>Th</th>
+                                        <th>Fr</th>
+                                        <th>Sa</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="old"><button type="button" class="btn-set-date">26</button></td>
+                                        <td class="old"><button type="button" class="btn-set-date">27</button></td>
+                                        <td class="old"><button type="button" class="btn-set-date">28</button></td>
+                                        <td class="old"><button type="button" class="btn-set-date">29</button></td>
+                                        <td class="old"><button type="button" class="btn-set-date">30</button></td>
+                                        <td><button type="button" class="btn-set-date">1</button></td>
+                                        <td><button type="button" class="btn-set-date">2</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td><button type="button" class="btn-set-date">3</button></td>
+                                        <td><button type="button" class="btn-set-date">4</button></td>
+                                        <td><button type="button" class="btn-set-date">5</button></td>
+                                        <td><button type="button" class="btn-set-date">6</button></td>
+                                        <td class="period start"><button type="button" class="btn-set-date">7</button>
+                                        </td>
+                                        <td class="period"><button type="button" class="btn-set-date">8</button></td>
+                                        <td class="period"><button type="button" class="btn-set-date">9</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="period"><button type="button" class="btn-set-date">10</button></td>
+                                        <td class="period"><button type="button" class="btn-set-date">11</button></td>
+                                        <td class="period"><button type="button" class="btn-set-date">12</button></td>
+                                        <td class="period"><button type="button" class="btn-set-date">13</button></td>
+                                        <td class="period"><button type="button" class="btn-set-date">14</button></td>
+                                        <td class="period"><button type="button" class="btn-set-date">15</button></td>
+                                        <td class="period end"><button type="button" class="btn-set-date">16</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><button type="button" class="btn-set-date">17</button></td>
+                                        <td><button type="button" class="btn-set-date">18</button></td>
+                                        <td><button type="button" class="btn-set-date">19</button></td>
+                                        <td><button type="button" class="btn-set-date">20</button></td>
+                                        <td><button type="button" class="btn-set-date">21</button></td>
+                                        <td><button type="button" class="btn-set-date">22</button></td>
+                                        <td><button type="button" class="btn-set-date">23</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td><button type="button" class="btn-set-date">24</button></td>
+                                        <td><button type="button" class="btn-set-date">25</button></td>
+                                        <td><button type="button" class="btn-set-date">26</button></td>
+                                        <td><button type="button" class="btn-set-date">27</button></td>
+                                        <td><button type="button" class="btn-set-date">28</button></td>
+                                        <td><button type="button" class="btn-set-date">29</button></td>
+                                        <td><button type="button" class="btn-set-date">30</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td><button type="button" class="btn-set-date">31</button></td>
+                                        <td class="new"><button type="button" class="btn-set-date">1</button></td>
+                                        <td class="new"><button type="button" class="btn-set-date">2</button></td>
+                                        <td class="new"><button type="button" class="btn-set-date">3</button></td>
+                                        <td class="new"><button type="button" class="btn-set-date">4</button></td>
+                                        <td class="new"><button type="button" class="btn-set-date">5</button></td>
+                                        <td class="new"><button type="button" class="btn-set-date">6</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="datepicker-btn-wrap">
+                                <button type="button" class="btn tertiary sm">취소</button>
+                                <button type="button" class="btn primary sm">확인</button>
+                            </div>
+                        </div>
+                        <div class="datepicker-conts datepicker-year-wrap" aria-hidden="true" tabindex="-1">
+                            <ul class="sel year">
+                                <li>
+                                    <button type="button" class="btn sm">2001</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm active">2002</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2003</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2004</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2005</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2006</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2007</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2008</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2009</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2010</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2011</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2012</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2013</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2014</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2015</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2016</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2017</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2018</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2019</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2020</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2021</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2022</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">2023</button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="datepicker-conts datepicker-mon-wrap" aria-hidden="true" tabindex="-1">
+                            <ul class="sel month">
+                                <li>
+                                    <button type="button" class="btn sm">01월</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">02월</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">03월</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm active">04월</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">05월</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">06월</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">07월</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">08월</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">09월</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">10월</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">11월</button>
+                                </li>
+                                <li>
+                                    <button type="button" class="btn sm">12월</button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

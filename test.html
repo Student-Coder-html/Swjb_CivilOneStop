@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>정부 웹사이트 컴포넌트 허브</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            border-bottom: 1px solid #e5e5e5;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .header-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .header-link:hover {
+            color: #1a1a1a;
+        }
+
+        /* Navigation */
+        nav {
+            background: white;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-item {
+            padding: 16px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            color: #1a1a1a;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        .page-header {
+            margin-bottom: 48px;
+        }
+
+        .page-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .page-description {
+            font-size: 18px;
+            color: #666;
+            max-width: 600px;
+        }
+
+        /* Search Bar */
+        .search-container {
+            margin-bottom: 48px;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 600px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 20px 16px 48px;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 18px;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f0f0f0;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .loading-details {
+            color: #667eea;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        .loading-progress {
+            max-width: 400px;
+            margin: 20px auto 0;
+            background: #f0f0f0;
+            height: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .loading-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            gap: 32px;
+            margin-bottom: 32px;
+            padding: 20px 0;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .stat-number {
+            font-weight: 600;
+            color: #1a1a1a;
+            font-size: 20px;
+        }
+
+        /* Component Grid */
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .component-card {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .component-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .component-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+            border-color: #667eea;
+        }
+
+        .component-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .component-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .component-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .component-path {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 16px;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .component-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .component-tag {
+            background: #f5f5f5;
+            color: #666;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .component-size {
+            color: #999;
+            font-size: 12px;
+            margin-left: auto;
+        }
+
+        /* Error Message */
+        .error-message {
+            background: white;
+            border: 1px solid #ffd4d4;
+            border-radius: 16px;
+            padding: 32px;
+            margin: 40px 0;
+            max-width: 800px;
+        }
+
+        .error-message h3 {
+            color: #d32f2f;
+            margin-bottom: 16px;
+            font-size: 20px;
+        }
+
+        .error-message p {
+            color: #666;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .error-message ul {
+            margin: 16px 0 16px 24px;
+            color: #666;
+        }
+
+        .error-message li {
+            margin-bottom: 8px;
+        }
+
+        .error-details {
+            background: #f5f5f5;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            color: #666;
+        }
+
+        /* Footer */
+        footer {
+            background: white;
+            border-top: 1px solid #e5e5e5;
+            margin-top: 120px;
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 40px 40px;
+        }
+
+        .repo-info {
+            background: #f5f5f5;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 48px;
+        }
+
+        .repo-info strong {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .repo-info a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .repo-info a:hover {
+            text-decoration: underline;
+        }
+
+        .repo-info small {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 48px;
+            margin-bottom: 48px;
+        }
+
+        .footer-section h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1a1a1a;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .footer-link {
+            display: block;
+            color: #666;
+            text-decoration: none;
+            margin-bottom: 12px;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .footer-link:hover {
+            color: #667eea;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #e5e5e5;
+            padding-top: 32px;
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-state-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-text {
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+
+            .header-container,
+            .nav-container,
+            main,
+            .footer-container {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .page-title {
+                font-size: 36px;
+            }
+
+            .page-description {
+                font-size: 16px;
+            }
+
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-links {
+                display: none;
+            }
+
+            .stats-bar {
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <div class="logo-icon">📦</div>
+                <span>Component Hub</span>
+            </div>
+            <div class="header-links">
+                <a href="#" class="header-link" id="githubHeaderLink">GitHub</a>
+                <a href="#" class="header-link">Documentation</a>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="nav-container">
+            <div class="nav-item active" onclick="showCategory('all')">All</div>
+            <div class="nav-item" onclick="showCategory('components')">Components</div>
+            <div class="nav-item" onclick="showCategory('pages')">Pages</div>
+            <div class="nav-item" onclick="showCategory('templates')">Templates</div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="page-header">
+            <h1 class="page-title">Component Library</h1>
+            <p class="page-description">
+                Browse and explore open-source government website components automatically synced from GitHub.
+            </p>
+        </div>
+
+        <div class="search-container">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search components...">
+            </div>
+        </div>
+
+        <div class="stats-bar hidden" id="statsBar">
+            <div class="stat-item">
+                <span class="stat-number" id="totalCount">0</span>
+                <span>components</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="categoryCount">0</span>
+                <span>in category</span>
+            </div>
+        </div>
+
+        <div id="content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p class="loading-text">Loading components from GitHub...</p>
+            </div>
+        </div>
+
+        <div class="component-grid hidden" id="componentGrid">
+            <!-- Components will be populated here -->
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="repo-info hidden" id="repoInfo">
+                <!-- Repository info will be inserted here -->
+            </div>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Project</h3>
+                    <a href="#" class="footer-link" id="githubLink">GitHub Repository</a>
+                    <a href="#" class="footer-link">Documentation</a>
+                    <a href="#" class="footer-link">Contributing</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Resources</h3>
+                    <a href="#" class="footer-link">Getting Started</a>
+                    <a href="#" class="footer-link">Examples</a>
+                    <a href="#" class="footer-link">API Reference</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Community</h3>
+                    <a href="#" class="footer-link" id="issuesLink">Issues</a>
+                    <a href="#" class="footer-link">Discussions</a>
+                    <a href="#" class="footer-link">License</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>Open Source Project · Built with ❤️</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ========== CONFIGURATION ==========
+        const GITHUB_CONFIG = {
+            owner: 'Special-Srit',
+            repo: 'Swjb_CivilOneStop',
+            branch: 'main',
+            path: '',
+            token: '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' // read token from env
+        };
+        // ===================================
+
+        let allComponents = [];
+        let currentCategory = 'all';
+
+        function detectCategory(path) {
+            const lowerPath = path.toLowerCase();
+            if (lowerPath.includes('component')) return 'components';
+            if (lowerPath.includes('page')) return 'pages';
+            if (lowerPath.includes('template')) return 'templates';
+            return 'components';
+        }
+
+        function getIconForFile(name) {
+            const lowerName = name.toLowerCase();
+            if (lowerName.includes('header') || lowerName.includes('nav')) return '🧭';
+            if (lowerName.includes('footer')) return '🔻';
+            if (lowerName.includes('form')) return '📝';
+            if (lowerName.includes('table') || lowerName.includes('data')) return '📊';
+            if (lowerName.includes('modal') || lowerName.includes('dialog')) return '💬';
+            if (lowerName.includes('search')) return '🔍';
+            if (lowerName.includes('card')) return '🎴';
+            if (lowerName.includes('button')) return '🔘';
+            if (lowerName.includes('menu')) return '☰';
+            if (lowerName.includes('login') || lowerName.includes('auth')) return '🔐';
+            return '📄';
+        }
+
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        async function fetchRepoContents(path = '') {
+            const headers = {
+                'Accept': 'application/vnd.github.v3+json'
+            };
+
+            if (GITHUB_CONFIG.token) {
+                headers['Authorization'] = `token ${GITHUB_CONFIG.token}`;
+            }
+
+            const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${path}`;
+
+            try {
+                const response = await fetch(url, { headers });
+
+                if (!response.ok) {
+                    throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                let htmlFiles = [];
+
+                for (const item of data) {
+                    if (item.type === 'file' && item.name.endsWith('.html')) {
+                        htmlFiles.push({
+                            name: item.name.replace('.html', ''),
+                            path: item.path,
+                            size: item.size,
+                            url: item.html_url,
+                            downloadUrl: item.download_url,
+                            category: detectCategory(item.path),
+                            icon: getIconForFile(item.name)
+                        });
+                    } else if (item.type === 'dir') {
+                        const subFiles = await fetchRepoContents(item.path);
+                        htmlFiles = htmlFiles.concat(subFiles);
+                    }
+                }
+
+                return htmlFiles;
+            } catch (error) {
+                console.error('Error fetching repository contents:', error);
+                throw error;
+            }
+        }
+
+        async function init() {
+            try {
+                const repoUrl = `https://github.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`;
+                document.getElementById('githubLink').href = repoUrl;
+                document.getElementById('githubHeaderLink').href = repoUrl;
+                document.getElementById('issuesLink').href = `${repoUrl}/issues`;
+
+                const repoInfoUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`;
+                const repoResponse = await fetch(repoInfoUrl);
+
+                if (repoResponse.ok) {
+                    const repoData = await repoResponse.json();
+                    const repoInfoEl = document.getElementById('repoInfo');
+                    repoInfoEl.classList.remove('hidden');
+                    repoInfoEl.innerHTML = `
+                        <strong>Repository:</strong> 
+                        <a href="${repoData.html_url}" target="_blank">${repoData.full_name}</a>
+                        ${repoData.description ? `<br><small>${repoData.description}</small>` : ''}
+                    `;
+                }
+
+                allComponents = await fetchRepoContents(GITHUB_CONFIG.path);
+
+                document.querySelector('.loading').style.display = 'none';
+                document.getElementById('componentGrid').classList.remove('hidden');
+                document.getElementById('statsBar').classList.remove('hidden');
+
+                if (allComponents.length === 0) {
+                    document.getElementById('componentGrid').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📦</div>
+                            <div class="empty-state-title">No components found</div>
+                            <p class="empty-state-text">Make sure your GitHub configuration is correct</p>
+                        </div>
+                    `;
+                } else {
+                    updateStats(allComponents.length, allComponents.length);
+                    renderComponents(allComponents);
+                }
+
+            } catch (error) {
+                document.querySelector('.loading').style.display = 'none';
+                document.getElementById('content').innerHTML = `
+                    <div class="error-message">
+                        <h3>⚠️ Unable to load components</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>Please check the following:</p>
+                        <ul>
+                            <li>GitHub repository settings are correct (owner, repo, branch)</li>
+                            <li>Repository is public (or access token is provided for private repos)</li>
+                            <li>Internet connection is stable</li>
+                            <li>GitHub API rate limit not exceeded (60 requests/hour)</li>
+                        </ul>
+                        <div class="error-details">
+                            <div>Owner: ${GITHUB_CONFIG.owner}</div>
+                            <div>Repo: ${GITHUB_CONFIG.repo}</div>
+                            <div>Branch: ${GITHUB_CONFIG.branch}</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function updateStats(total, filtered) {
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('categoryCount').textContent = filtered;
+        }
+
+        function renderComponents(componentsToRender) {
+            const grid = document.getElementById('componentGrid');
+            grid.innerHTML = '';
+
+            if (componentsToRender.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <div class="empty-state-title">No results found</div>
+                        <p class="empty-state-text">Try adjusting your search or filter</p>
+                    </div>
+                `;
+                return;
+            }
+
+            componentsToRender.forEach(component => {
+                const card = document.createElement('div');
+                card.className = 'component-card';
+                card.onclick = () => window.open(component.url, '_blank');
+
+                card.innerHTML = `
+                    <div class="component-icon">${component.icon}</div>
+                    <div class="component-name">${component.name}</div>
+                    <div class="component-path">${component.path}</div>
+                    <div class="component-meta">
+                        <span class="component-tag">${component.category}</span>
+                        <span class="component-size">${formatSize(component.size)}</span>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function showCategory(category) {
+            currentCategory = category;
+
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            const filtered = category === 'all'
+                ? allComponents
+                : allComponents.filter(c => c.category === category);
+
+            updateStats(allComponents.length, filtered.length);
+            renderComponents(filtered);
+        }
+
+        function searchComponents() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allComponents.filter(c =>
+                c.name.toLowerCase().includes(searchTerm) ||
+                c.path.toLowerCase().includes(searchTerm)
+            );
+            updateStats(allComponents.length, filtered.length);
+            renderComponents(filtered);
+        }
+
+        document.getElementById('searchInput').addEventListener('input', searchComponents);
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>
