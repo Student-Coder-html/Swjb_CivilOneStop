@@ -621,14 +621,11 @@ jobs:
                   }
 
                   async function init() {
-                      // --- START: Updated logic ---
                       const startTime = Date.now();
                       const minLoadTime = 1500; // Minimum 1.5 seconds
-                      // --- END: Updated logic ---
 
                       try {
                           updateLoaderLog('Finding content path...');
-                          // --- START: Robust Base Path Fix for GitHub Pages ---
                           let basePath = window.location.pathname;
                           if (basePath.endsWith('index.html')) {
                               basePath = basePath.substring(0, basePath.lastIndexOf('index.html'));
@@ -636,7 +633,6 @@ jobs:
                           if (!basePath.endsWith('/')) {
                               basePath += '/';
                           }
-                          // --- END: Fix ---
                           
                           updateLoaderLog('Fetching component & repo data...');
                           const [componentsData, repoData] = await Promise.all([
@@ -645,15 +641,29 @@ jobs:
                           ]);
 
                           updateLoaderLog('Processing data...');
-                          allComponents = componentsData.map(item => ({
-                              name: item.name.replace('.html', ''),
-                              path: item.path,
-                              size: item.size,
-                              url: item.html_url,
-                              downloadUrl: item.download_url,
-                              category: detectCategory(item.path),
-                              icon: getIconForFile(item.name)
-                          }));
+                          
+                          // --- START: New Label Logic ---
+                          allComponents = componentsData.map(item => {
+                              const pathParts = item.path.split('/');
+                              let rootFolderLabel = null;
+
+                              // Check if path has folders AND the first folder isn't a 'dot-folder'
+                              if (pathParts.length > 1 && !pathParts[0].startsWith('.')) {
+                                  rootFolderLabel = pathParts[0];
+                              }
+
+                              return {
+                                  name: item.name.replace('.html', ''),
+                                  path: item.path,
+                                  size: item.size,
+                                  url: item.html_url,
+                                  downloadUrl: item.download_url,
+                                  category: detectCategory(item.path),
+                                  icon: getIconForFile(item.name),
+                                  rootLabel: rootFolderLabel // Add the new property
+                              };
+                          });
+                          // --- END: New Label Logic ---
 
                           const repoUrl = repoData.html_url;
                           document.getElementById('githubHeaderLink').href = repoUrl;
@@ -668,27 +678,19 @@ jobs:
                           updateStats(allComponents.length, allComponents.length);
                           renderComponents(allComponents);
                           
-                          // --- START: Updated logic ---
-                          // Calculate how long we've been loading
                           const elapsedTime = Date.now() - startTime;
-                          // Wait for the remaining time, if any
                           const remainingTime = Math.max(0, minLoadTime - elapsedTime);
                           
                           setTimeout(() => {
-                              // Hide loader on success
                               hideLoader();
                           }, remainingTime);
-                          // --- END: Updated logic ---
 
                       } catch (error) {
                           console.error('Error:', error);
-
-                          // --- START: Updated logic (for error) ---
                           const elapsedTime = Date.now() - startTime;
                           const remainingTime = Math.max(0, minLoadTime - elapsedTime);
 
                           setTimeout(() => {
-                              // Still hide loader on error to show the error message
                               hideLoader(); 
                               document.getElementById('componentGrid').innerHTML = `
                                   <div class="empty-state">
@@ -698,7 +700,6 @@ jobs:
                                   </div>
                               `;
                           }, remainingTime);
-                          // --- END: Updated logic (for error) ---
                       }
                   }
 
@@ -726,15 +727,20 @@ jobs:
                           const card = document.createElement('div');
                           card.className = 'component-card';
                           card.onclick = () => window.open(component.url, '_blank');
+                          
+                          // --- START: Updated Card HTML ---
                           card.innerHTML = `
                               <div class="component-icon">${component.icon}</div>
                               <div class="component-name">${component.name}</div>
                               <div class="component-path">${component.path}</div>
                               <div class="component-meta">
                                   <span class="component-tag">${component.category}</span>
+                                  ${component.rootLabel ? `<span class="component-tag">${component.rootLabel}</span>` : ''}
                                   <span class="component-size">${formatSize(component.size)}</span>
                               </div>
                           `;
+                          // --- END: Updated Card HTML ---
+                          
                           grid.appendChild(card);
                       });
                   }
@@ -756,10 +762,16 @@ jobs:
 
                   function searchComponents() {
                       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                      
+                      // --- START: Updated Search Logic ---
+                      // Now also search the rootLabel
                       const filtered = allComponents.filter(c =>
                           c.name.toLowerCase().includes(searchTerm) ||
-                          c.path.toLowerCase().includes(searchTerm)
+                          c.path.toLowerCase().includes(searchTerm) ||
+                          (c.rootLabel && c.rootLabel.toLowerCase().includes(searchTerm))
                       );
+                      // --- END: Updated Search Logic ---
+                      
                       updateStats(allComponents.length, filtered.length);
                       renderComponents(filtered);
                   }
